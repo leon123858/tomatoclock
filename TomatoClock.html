@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <title>寶寶的番茄鐘</title>
+</head>
+<body>
+    <h1>番茄鐘</h1>
+    <form>
+        <h3>work</h3>
+        <label><input name="radio" type="radio" value="25" />25</label>
+        <label><input name="radio" type="radio" value="30" />30</label>
+        <label><input name="radio" type="radio" checked value="40" />40</label>
+        <h3>rest</h3>
+        <label><input name="radio" type="radio" value="5" />5</label>
+        <label><input name="radio" type="radio" value="10" />10</label>
+        <label><input name="radio" type="radio" value="15" />15</label>
+    </form>
+    <span>音樂連結: </span><input id="song" type="text" value="followLight.mp3" readonly />
+    <br />
+    <p></p>
+    <input id="start" type="button" value="start" />
+    <input id="ok" type="button" value="OK" />
+    <input id="stop" type="button" value="stop" />
+    <input id="end" type="button" value="end" />
+    <br />
+    <p id="sound"></p>
+    <h1 id="show_time" type="text"></h1>
+    <hr />
+    <br />
+    <h1>番茄記事本</h1>
+    <span>本日任務</span>&#160 &#160 &#160 <input id="clear" type="button" value="clear" />
+    &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160 &#160
+    <br /><br />
+    <span>加入任務</span>&#160 &#160 &#160 <input id="input" type="text" /><input id="input_confirm" type="button" value="加入" /><br /><br />
+    <p>雙擊表示任務完成</p>
+    <select id="memo" size="1" multiple>
+    </select>
+    <script>
+        var timer;
+        var stop;
+        function detime() {
+            document.getElementById("show_time").innerHTML = Math.floor(time / 60) + "分鐘" + time % 60 + "秒";
+            time--;
+            if (stop) time++;
+            if (time < 0) {
+                clearInterval(timer);
+                document.getElementById("sound").innerHTML = "<audio autoplay=\"autoplay\" id=\"auto\" src=\" " + $("#song").val() + "\"></audio>";
+                $("#stop").attr('disabled', true);
+                $("#ok").attr('disabled', false);
+            }
+        }
+         function originMemo() {
+            if($.cookie('line') == null)
+                $.cookie('line', '1', { expires: 7, path: '/'});
+            var linecount = $.cookie('line');
+            $("#memo").attr('size', linecount);
+            if (linecount > 1) {
+                for (var i = 2; i <= linecount; i++) {
+                    document.getElementById("memo").innerHTML += "<option value = \""+i+"\">" + String(i-1) + ". "+ String($.cookie(String(i))) + "</option>"
+                }
+                $("#memo").attr('size', linecount-1);
+            }
+        }
+        function clearMemo() {
+            $.cookie('line', '1', { expires: 7, path: '/'});
+            document.getElementById("memo").innerHTML = "";
+            $("#memo").attr('size', 1);
+        }
+        function addMission(str) {
+            var line = String(parseInt($.cookie('line')) + 1);
+            $.cookie(line, str, { expires: 7, path: '/' });
+            $.cookie('line', line, { expires: 7, path: '/'});
+            document.getElementById("memo").innerHTML += "<option value = \""+line+"\">" + String(parseInt(line)-1) + ". " + String($.cookie(line)) + "</option>";
+            $("#memo").attr('size', line-1);
+        }
+        $(document).ready(function () {
+            stop = false;
+            originMemo();
+            $("#clear").click(function () {
+                clearMemo();
+            });
+            $("#input_confirm").click(function () {
+                addMission($("#input").val());
+                $("#input").val("");
+            });
+            $("#stop").attr('disabled', true);
+            $("#ok").attr('disabled', true);
+            $("#start").click(function () {
+                $("#start").attr('disabled', true);
+                $("#ok").attr('disabled', true);
+                $("#stop").attr('disabled', false);
+                time = $('input[name=radio]:checked').val() * 60;
+                document.getElementById("show_time").innerHTML = Math.floor(time / 60) + "分鐘" + time % 60 + "秒";
+                timer = window.setInterval("detime()", 1000);
+            });
+            $("#ok").click(function () {
+                $("#start").attr('disabled', false);
+                $("#ok").attr('disabled', true);
+                document.getElementById("sound").innerHTML = "";
+                time = $('input[name=radio]:checked').val();
+            });
+            $("#stop").click(function () {
+                !stop ? $("#stop").attr('value', 'go') : $("#stop").attr('value', 'stop');
+                stop ? stop = false : stop = true;
+            });
+            $("#end").click(function () {
+                time = 0;
+            });
+            $("#memo").dblclick(function(){
+                $("#memo option").each(function () {
+                    if (this.selected == true) {
+                        this.innerHTML += "(已完成)";
+                        $.cookie(String(this.value), this.innerHTML, { expires: 7, path: '/' });
+                    }
+                 });
+             });
+        });
+    </script>
+</body>
+</html>
