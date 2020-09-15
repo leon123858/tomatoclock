@@ -97,6 +97,17 @@
             });
             $("#stop").attr('disabled', true);
             $("#ok").attr('disabled', true);
+            var url = new URL(location.href);
+            var freestart = url.searchParams.get('start');
+            var otime = url.searchParams.get('time');
+            if(freestart == 'true'){
+                $("#start").attr('disabled', true);
+                $("#ok").attr('disabled', true);
+                $("#stop").attr('disabled', false);
+                time = parseInt(otime) * 60;
+                document.getElementById("show_time").innerHTML = Math.floor(time / 60) + "分鐘" + time % 60 + "秒";
+                timer = window.setInterval("detime()", 1000);
+            }
             $("#start").click(function () {
                 $("#start").attr('disabled', true);
                 $("#ok").attr('disabled', true);
@@ -126,7 +137,6 @@
                     console.log(String(i-1) + ' save ' + $.cookie(String(i)));
                 }
                 $.cookie('line', String(now_line-1), { expires: 777, path: '/' });
-                location.reload();
             }
             $("#memo").dblclick(function(){
                 $("#memo option").each(function () {
@@ -134,6 +144,8 @@
                         shift(parseInt(this.value));
                         this.remove();
                         $("#memo").attr('size', $("#memo").attr('size') - 1);
+                        document.getElementById("memo").innerHTML = '';
+                        originMemo();
                     }
                  });
              });
