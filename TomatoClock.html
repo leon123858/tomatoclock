@@ -60,7 +60,7 @@
             $("#memo").attr('size', linecount);
             if (linecount > 1) {
                 for (var i = 2; i <= linecount; i++) {
-                    document.getElementById("memo").innerHTML += "<option value = \""+i+"\">" + String(i-1) + ". "+ String($.cookie(String(i))) + "</option>"
+                    document.getElementById("memo").innerHTML += "<option value = \""+i+"\">" +String($.cookie(String(i))) + "</option>";
                 }
                 $("#memo").attr('size', linecount-1);
             }
@@ -72,9 +72,9 @@
         }
         function addMission(str) {
             var line = String(parseInt($.cookie('line')) + 1);
-            $.cookie(line, str, { expires: 7, path: '/' });
-            $.cookie('line', line, { expires: 7, path: '/'});
-            document.getElementById("memo").innerHTML += "<option value = \""+line+"\">" + String(parseInt(line)-1) + ". " + String($.cookie(line)) + "</option>";
+            $.cookie(line, str, { expires: 777, path: '/' });
+            $.cookie('line', line, { expires: 777, path: '/'});
+            document.getElementById("memo").innerHTML += "<option value = \""+line+"\">" + String($.cookie(line)) + "</option>";
             $("#memo").attr('size', line-1);
         }
         $(document).ready(function () {
@@ -83,9 +83,17 @@
             $("#clear").click(function () {
                 clearMemo();
             });
+            $("#input").keydown(function(e){
+                if(e.keyCode == 13)
+                    $("#input_confirm").click();
+            });
             $("#input_confirm").click(function () {
-                addMission($("#input").val());
-                $("#input").val("");
+                if($("#input").val() != ''){
+                    addMission($("#input").val());
+                    $("#input").val("");
+                }
+                else
+                    alert('mission can not be empty');
             });
             $("#stop").attr('disabled', true);
             $("#ok").attr('disabled', true);
@@ -110,11 +118,22 @@
             $("#end").click(function () {
                 time = 0;
             });
+            function shift(mid){
+                var now_line = parseInt($.cookie('line'));
+                console.log(mid +'   '+ now_line );
+                for(var i = mid + 1;i<=now_line;i++){
+                    $.cookie(String(i-1), $.cookie(String(i)), { expires: 777, path: '/' });
+                    console.log(String(i-1) + ' save ' + $.cookie(String(i)));
+                }
+                $.cookie('line', String(now_line-1), { expires: 777, path: '/' });
+                location.reload();
+            }
             $("#memo").dblclick(function(){
                 $("#memo option").each(function () {
                     if (this.selected == true) {
-                        this.innerHTML += "(已完成)";
-                        $.cookie(String(this.value), this.innerHTML, { expires: 7, path: '/' });
+                        shift(parseInt(this.value));
+                        this.remove();
+                        $("#memo").attr('size', $("#memo").attr('size') - 1);
                     }
                  });
              });
